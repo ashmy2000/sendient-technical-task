@@ -19,17 +19,35 @@ export function ProgressForm({ students, topics }: ProgressFormProps) {
   const [topicId, setTopicId] = useState<number | null>(null);
   const [score, setScore] = useState("");
   const [notes, setNotes] = useState("");
+  const [scoreError, setScoreError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function handleSubmit() {
     if (studentId == null || topicId == null) return;
+    const parsedScore = Number(score);
+    if (
+      score.trim() === "" ||
+      !Number.isFinite(parsedScore) ||
+      !Number.isInteger(parsedScore) ||
+      parsedScore < 0 ||
+      parsedScore > 100
+    ) {
+      setScoreError("Score must be a whole number between 0 and 100.");
+      return;
+    }
+
+    setScoreError(null);
     startTransition(async () => {
-      await recordProgress({
+      const result = await recordProgress({
         studentId,
         topicId,
-        score: Number(score),
+        score: parsedScore,
         notes: notes || null,
       });
+      if (!result.success) {
+        setScoreError(result.error);
+        return;
+      }
       router.push(`/students/${studentId}`);
     });
   }
@@ -82,11 +100,25 @@ export function ProgressForm({ students, topics }: ProgressFormProps) {
           <p className="mb-2 text-sm font-medium">Score</p>
           <input
             type="number"
+            required
+            min={0}
+            max={100}
+            step={1}
             value={score}
-            onChange={(e) => setScore(e.target.value)}
+            onChange={(e) => {
+              setScore(e.target.value);
+              setScoreError(null);
+            }}
             placeholder="0 – 100"
+            aria-invalid={scoreError != null}
+            aria-describedby={scoreError ? "score-error" : undefined}
             className="h-9 w-32 rounded-md border border-border bg-background px-2 text-sm"
           />
+          {scoreError ? (
+            <p id="score-error" className="mt-1 text-sm text-error">
+              {scoreError}
+            </p>
+          ) : null}
         </div>
 
         <div>
