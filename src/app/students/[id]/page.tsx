@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import { Card, CardSubtitle, CardTitle } from "@/components/ui/Card";
-import { ScoreBadge } from "@/components/ScoreBadge";
 import { AverageScoreWidget } from "@/components/AverageScoreWidget";
+import { ProgressLogRow } from "@/components/ProgressLogRow";
 import {
   getProgressForStudent,
   getStudent,
@@ -65,30 +65,32 @@ export default async function StudentDetailPage({ params }: PageProps) {
 
       <Card>
         <CardTitle>Progress log</CardTitle>
-        <table className="mt-3 w-full border-collapse text-sm">
-          <thead className="text-left text-muted-foreground">
-            <tr>
-              <th className="py-1 font-medium">Date</th>
-              <th className="py-1 font-medium">Topic</th>
-              <th className="py-1 font-medium">Subject</th>
-              <th className="py-1 font-medium">Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {progress.map((p) => (
-              <tr key={p.id} className="border-t border-border">
-                <td className="py-2 text-muted-foreground">
-                  {new Date(p.recordedAt).toLocaleDateString()}
-                </td>
-                <td className="py-2">{p.topicName}</td>
-                <td className="py-2 text-muted-foreground">{p.topicSubject}</td>
-                <td className="py-2">
-                  <ScoreBadge score={p.score} />
-                </td>
+        <div className="overflow-x-auto">
+          <table className="mt-3 w-full border-collapse text-sm">
+            <thead className="text-left text-muted-foreground">
+              <tr>
+                <th className="py-1 font-medium">Date</th>
+                <th className="py-1 font-medium">Topic</th>
+                <th className="py-1 font-medium">Subject</th>
+                <th className="py-1 font-medium">Score</th>
+                <th className="py-1 text-center font-medium">Notes</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {progress.map((p) => (
+                <ProgressLogRow
+                  key={p.id}
+                  id={p.id}
+                  date={new Date(p.recordedAt).toLocaleDateString()}
+                  topicName={p.topicName}
+                  topicSubject={p.topicSubject}
+                  score={p.score}
+                  notes={p.notes}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
         {progress.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
             No progress recorded yet.
