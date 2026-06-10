@@ -1,11 +1,9 @@
 import { cn } from "@/lib/utils/cn";
 
 export function ScoreBadge({ score }: { readonly score: number }) {
-  // Score-to-colour mapping. Note: hardcoded Tailwind colours rather than
-  // semantic tokens, and the upper bound is not defended against here either.
-  let cls = "bg-red-100 text-red-700";
-  if (score >= 70) cls = "bg-green-100 text-green-700";
-  else if (score >= 50) cls = "bg-yellow-100 text-yellow-700";
+  let cls = "bg-error/10 text-error";
+  if (score >= 70) cls = "bg-success/10 text-success";
+  else if (score >= 50) cls = "bg-warning/10 text-warning";
 
   return (
     <span

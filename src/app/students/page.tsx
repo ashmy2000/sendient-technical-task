@@ -37,7 +37,7 @@ export default async function StudentsPage() {
                 <td className="px-3 py-2 text-right">
                   <Link
                     href={`/students/${s.id}`}
-                    className="text-sm font-medium text-blue-600 hover:underline"
+                    className="text-sm font-medium text-primary hover:underline"
                   >
                     View →
                   </Link>
