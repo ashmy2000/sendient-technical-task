@@ -20,3 +20,9 @@ next-env.d.ts
 # Hiring-side answer key and rubric — never commit to the candidate repo.
 _hiring/
 
+# Local SQLite database 
+data.db-shm
+data.db-wal
+
+tsconfig.tsbuildinfo
+*.tsbuildinfo
