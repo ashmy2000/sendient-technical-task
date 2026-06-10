@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Navigation } from "@/components/Navigation";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,29 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen">
         <header className="border-b border-border">
-          <nav className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3 text-sm">
-            <Link href="/" className="font-semibold">
-              Progress Tracker
-            </Link>
-            <Link
-              href="/students"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Students
-            </Link>
-            <Link
-              href="/topics"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Topics
-            </Link>
-            <Link
-              href="/progress/new"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Record progress
-            </Link>
-          </nav>
+          <Navigation />
         </header>
         <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
       </body>
