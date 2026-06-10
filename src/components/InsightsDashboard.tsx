@@ -547,8 +547,11 @@ export function InsightsDashboard({ data }: InsightsDashboardProps) {
                             <span>
                               {formatAverage(topic.average)} (
                               {topic.recordCount}{" "}
-                              {topic.recordCount === 1 ? "record" : "records"}{" "}
-                              below 50%)
+                              {topic.recordCount === 1 ? "record" : "records"},{" "}
+                              {topic.confidence === "mayNeedFocus"
+                                ? "may need focus"
+                                : "early concern"}
+                              )
                             </span>
                           </li>
                         ))}

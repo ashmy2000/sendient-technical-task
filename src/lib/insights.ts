@@ -83,6 +83,7 @@ export interface StudentAreaInsight {
   readonly detail: "Subject" | "Topic";
   readonly average: number;
   readonly recordCount: number;
+  readonly confidence?: "earlyConcern" | "mayNeedFocus";
 }
 
 export interface StudentRecordInsight {
@@ -211,14 +212,17 @@ export function buildStudentRecordInsight(
           .filter((topic) => topic.subject === subject)
           .map((topic) => topic.id),
       );
-      const scores = studentRecords
-        .filter((record) => topicIds.has(record.topicId))
-        .map((record) => record.score);
+      const subjectTopics = topicInsights.filter(
+        (topic) => topic.subject === subject,
+      );
+      const recordCount = studentRecords.filter((record) =>
+        topicIds.has(record.topicId),
+      ).length;
 
       return {
         subject,
-        average: average(scores),
-        recordCount: scores.length,
+        average: average(subjectTopics.map((topic) => topic.average)),
+        recordCount,
       };
     });
   const topicAreas = topicInsights.map(
@@ -237,11 +241,17 @@ export function buildStudentRecordInsight(
     subjects,
     focusAreas: topicAreas
       .filter((area) => area.average < 50)
+      .map((area): StudentAreaInsight => ({
+        ...area,
+        confidence:
+          area.recordCount >= 3 ? "mayNeedFocus" : "earlyConcern",
+      }))
       .sort(
         (a, b) =>
           a.average - b.average || a.label.localeCompare(b.label),
       ),
     strengths: [...topicAreas]
+      .filter((area) => area.average >= 70 && area.recordCount >= 2)
       .sort(
         (a, b) =>
           b.average - a.average ||

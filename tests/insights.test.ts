@@ -322,32 +322,102 @@ describe("buildCohortInsights", () => {
     ]);
   });
 
-  it("builds null-safe individual student subjects, focus areas and strengths", () => {
+  it("weights individual subject averages equally by topic", () => {
     const result = buildStudentRecordInsight(1, topics, [
       { studentId: 1, topicId: 1, score: 0 },
-      { studentId: 1, topicId: 2, score: 80 },
+      { studentId: 1, topicId: 1, score: 0 },
+      { studentId: 1, topicId: 1, score: 0 },
+      { studentId: 1, topicId: 2, score: 100 },
     ]);
 
-    expect(result.overallAverage).toBe(40);
+    expect(result.overallAverage).toBe(25);
     expect(result.subjects).toEqual([
-      { subject: "Maths", average: 40, recordCount: 2 },
+      { subject: "Maths", average: 50, recordCount: 4 },
       { subject: "Science", average: null, recordCount: 0 },
     ]);
-    expect(result.focusAreas).toEqual([
-      {
-        key: "topic:1",
-        label: "Algebra",
-        detail: "Topic",
-        average: 0,
-        recordCount: 1,
-      },
+  });
+
+  it("marks low topics with one or two records as early concerns", () => {
+    const result = buildStudentRecordInsight(1, topics, [
+      { studentId: 1, topicId: 1, score: 20 },
+      { studentId: 1, topicId: 1, score: 40 },
     ]);
-    expect(result.strengths[0]).toEqual({
-      key: "topic:2",
-      label: "Geometry",
-      detail: "Topic",
-      average: 80,
-      recordCount: 1,
+
+    expect(result.focusAreas).toEqual([
+      expect.objectContaining({
+        key: "topic:1",
+        average: 30,
+        recordCount: 2,
+        confidence: "earlyConcern",
+      }),
+    ]);
+  });
+
+  it("marks low topics with at least three records as needing focus", () => {
+    const result = buildStudentRecordInsight(1, topics, [
+      { studentId: 1, topicId: 1, score: 30 },
+      { studentId: 1, topicId: 1, score: 40 },
+      { studentId: 1, topicId: 1, score: 50 },
+    ]);
+
+    expect(result.focusAreas).toEqual([
+      expect.objectContaining({
+        key: "topic:1",
+        average: 40,
+        recordCount: 3,
+        confidence: "mayNeedFocus",
+      }),
+    ]);
+  });
+
+  it("requires strengths to average at least 70 across two records", () => {
+    const result = buildStudentRecordInsight(1, topics, [
+      { studentId: 1, topicId: 1, score: 60 },
+      { studentId: 1, topicId: 1, score: 70 },
+      { studentId: 1, topicId: 2, score: 90 },
+      { studentId: 1, topicId: 3, score: 70 },
+      { studentId: 1, topicId: 3, score: 80 },
+    ]);
+
+    expect(result.strengths).toEqual([
+      expect.objectContaining({
+        key: "topic:3",
+        average: 75,
+        recordCount: 2,
+      }),
+    ]);
+  });
+
+  it("never includes the same topic in focus areas and strengths", () => {
+    const result = buildStudentRecordInsight(1, topics, [
+      { studentId: 1, topicId: 1, score: 20 },
+      { studentId: 1, topicId: 1, score: 30 },
+      { studentId: 1, topicId: 2, score: 80 },
+      { studentId: 1, topicId: 2, score: 90 },
+    ]);
+    const focusKeys = new Set(result.focusAreas.map((area) => area.key));
+
+    expect(
+      result.strengths.some((strength) => focusKeys.has(strength.key)),
+    ).toBe(false);
+    expect(result.focusAreas.map((area) => area.key)).toEqual(["topic:1"]);
+    expect(result.strengths.map((area) => area.key)).toEqual(["topic:2"]);
+  });
+
+  it("preserves zero and null individual subject averages", () => {
+    const result = buildStudentRecordInsight(1, topics, [
+      { studentId: 1, topicId: 1, score: 0 },
+    ]);
+
+    expect(result.subjects).toEqual([
+      { subject: "Maths", average: 0, recordCount: 1 },
+      { subject: "Science", average: null, recordCount: 0 },
+    ]);
+    expect(result.overallAverage).toBe(0);
+    expect(result.strengths).toEqual([]);
+    expect(result.focusAreas[0]).toMatchObject({
+      average: 0,
+      confidence: "earlyConcern",
     });
   });
 });
