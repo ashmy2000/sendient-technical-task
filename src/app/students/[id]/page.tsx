@@ -34,7 +34,7 @@ export default async function StudentDetailPage({ params }: PageProps) {
         </div>
         <Link
           href="/students"
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-primary hover:underline"
         >
           ← All students
         </Link>

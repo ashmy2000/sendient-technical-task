@@ -8,6 +8,7 @@ const navItems = [
   { href: "/students", label: "Students" },
   { href: "/topics", label: "Topics" },
   { href: "/progress/new", label: "Record progress" },
+  { href: "/insights", label: "Cohort insights" },
 ] as const;
 
 function isActiveRoute(pathname: string, href: string): boolean {
